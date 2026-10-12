@@ -1,0 +1,76 @@
+{
+  "announcements": [
+    {
+      "id": 1,
+      "title": "Term 3 Examination Schedule & Guidelines",
+      "date": "2026-10-15",
+      "category": "Academic",
+      "strand": "General",
+      "author": "Office of the Principal",
+      "content": "Official schedule for the upcoming Term 3 Quarterly Examinations. Please clear all departmental clearances before October 20."
+    },
+    {
+      "id": 2,
+      "title": "URGENT: Submission of Research Consent Forms",
+      "date": "2026-10-14",
+      "category": "Urgent",
+      "strand": "STEM",
+      "author": "Research Committee",
+      "content": "All Grade 12 STEM students participating in the Schooldule evaluation study must submit signed parental consent forms."
+    }
+  ],
+  "events": [
+    {
+      "id": 1,
+      "title": "Science & Innovation Fair 2026",
+      "date": "2026-10-22",
+      "category": "Event",
+      "description": "Annual presentation of research projects and innovation prototypes in the LSHS Gymnasium."
+    },
+    {
+      "id": 2,
+      "title": "Research Paper Final Submission",
+      "date": "2026-10-28",
+      "category": "Deadline",
+      "description": "Deadline for submitting Chapter 1 to 3 revisions to research advisers."
+    }
+  ],
+  "schedules": {
+    "12-STEM-A": [
+      { "time": "07:30 - 08:30 AM", "subject": "General Physics 2", "room": "Lab 1", "instructor": "Engr. Santos" },
+      { "time": "08:30 - 09:30 AM", "subject": "Practical Research 2", "room": "Room 302", "instructor": "Dr. Ramos" },
+      { "time": "09:30 - 10:00 AM", "subject": "RECESS / BREAK", "room": "Canteen", "instructor": "-" },
+      { "time": "10:00 - 11:00 AM", "subject": "Calculus", "room": "Room 302", "instructor": "Prof. Cruz" },
+      { "time": "11:00 - 12:00 PM", "subject": "Media & Info Literacy", "room": "Comp Lab", "instructor": "Ms. Reyes" }
+    ],
+    "11-STEM-A": [
+      { "time": "07:30 - 08:30 AM", "subject": "General Mathematics", "room": "Room 101", "instructor": "Mr. Mercado" },
+      { "time": "08:30 - 09:30 AM", "subject": "Earth Science", "room": "Lab 2", "instructor": "Mrs. Garcia" },
+      { "time": "09:30 - 10:00 AM", "subject": "RECESS / BREAK", "room": "Canteen", "instructor": "-" },
+      { "time": "10:00 - 11:00 AM", "subject": "Oral Communication", "room": "Room 101", "instructor": "Ms. Torres" }
+    ]
+  },
+  "directories": {
+    "clubs": [
+      {
+        "name": "Science Research Guild",
+        "adviser": "Dr. Ramos",
+        "president": "Mauricio C. Durante",
+        "meeting": "Wednesdays 3:30 PM",
+        "contact": "srg@lshs.edu.ph"
+      },
+      {
+        "name": "Supreme Secondary Learner Government (SSLG)",
+        "adviser": "Mr. Reyes",
+        "president": "Resha Mae E. Pasco",
+        "meeting": "Fridays 4:00 PM",
+        "contact": "sslg@lshs.edu.ph"
+      }
+    ],
+    "offices": [
+      { "office": "Principal's Office", "head": "Dr. Maria Santos", "email": "principal@lshs.edu.ph", "phone": "(049) 501-1234" },
+      { "office": "Registrar's Office", "head": "Mr. Juan Dela Cruz", "email": "registrar@lshs.edu.ph", "phone": "(049) 501-5678" },
+      { "office": "Guidance & Counseling", "head": "Mrs. Ana Reyes", "email": "guidance@lshs.edu.ph", "phone": "(049) 501-9012" }
+    ]
+  }
+}

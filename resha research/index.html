@@ -1,0 +1,1787 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Schooldule - Laguna Senior High School Centralized Portal</title>
+    
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <!-- FontAwesome Icons CDN -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <!-- Google Fonts Inter -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    
+    <!-- Supabase JS Client v2 CDN -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif'],
+                    },
+                    colors: {
+                        lshs: {
+                            navy: '#0f2942',
+                            blue: '#1e3a8a',
+                            lightBlue: '#3b82f6',
+                            gold: '#d97706',
+                            brightGold: '#f59e0b',
+                            lightGold: '#fef3c7',
+                            slate: '#f8fafc'
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        ::-webkit-scrollbar {
+            width: 6px;
+            height: 6px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #f1f5f9;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #cbd5e1;
+            border-radius: 4px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #94a3b8;
+        }
+        @media print {
+            .no-print {
+                display: none !important;
+            }
+            .print-only {
+                display: block !important;
+            }
+            body {
+                background: white !important;
+                color: black !important;
+            }
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(6px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        .animate-fadeIn {
+            animation: fadeIn 0.25s ease-out forwards;
+        }
+    </style>
+</head>
+<body class="bg-slate-100 text-slate-800 font-sans min-h-screen flex flex-col">
+
+    <!-- Top Navigation Bar -->
+    <header class="bg-lshs-navy text-white shadow-lg sticky top-0 z-40 border-b-4 border-lshs-gold no-print">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex items-center justify-between h-20">
+                <!-- Branding & Logo -->
+                <div class="flex items-center space-x-3 cursor-pointer" onclick="switchTab('home')">
+                    <div class="bg-white p-2 rounded-full shadow-md flex items-center justify-center w-12 h-12 border-2 border-lshs-gold">
+                        <i class="fa-solid font-bold text-lshs-navy text-2xl fa-graduation-cap"></i>
+                    </div>
+                    <div>
+                        <div class="flex items-center space-x-2">
+                            <span class="text-2xl font-extrabold tracking-wider text-white">Schooldule</span>
+                            <span class="bg-lshs-gold text-xs font-bold px-2 py-0.5 rounded text-lshs-navy uppercase">LSHS</span>
+                        </div>
+                        <p class="text-xs text-slate-300 font-medium">Laguna Senior High School Centralized Hub</p>
+                    </div>
+                </div>
+
+                <!-- Desktop Navigation Links -->
+                <nav class="hidden md:flex space-x-1 lg:space-x-2">
+                    <button onclick="switchTab('home')" id="nav-home" class="nav-btn px-3 py-2 rounded-lg text-sm font-semibold transition-all duration-200 hover:bg-white/10 text-lshs-brightGold bg-white/10 flex items-center space-x-1.5">
+                        <i class="fa-solid fa-house"></i> <span>Home</span>
+                    </button>
+                    <button onclick="switchTab('announcements')" id="nav-announcements" class="nav-btn px-3 py-2 rounded-lg text-sm font-semibold transition-all duration-200 hover:bg-white/10 text-slate-200 flex items-center space-x-1.5">
+                        <i class="fa-solid fa-bullhorn"></i> <span>Announcements</span>
+                    </button>
+                    <button onclick="switchTab('calendar')" id="nav-calendar" class="nav-btn px-3 py-2 rounded-lg text-sm font-semibold transition-all duration-200 hover:bg-white/10 text-slate-200 flex items-center space-x-1.5">
+                        <i class="fa-solid fa-calendar-days"></i> <span>Events</span>
+                    </button>
+                    <button onclick="switchTab('schedules')" id="nav-schedules" class="nav-btn px-3 py-2 rounded-lg text-sm font-semibold transition-all duration-200 hover:bg-white/10 text-slate-200 flex items-center space-x-1.5">
+                        <i class="fa-solid fa-clock"></i> <span>Schedules</span>
+                    </button>
+                    <button onclick="switchTab('clubs')" id="nav-clubs" class="nav-btn px-3 py-2 rounded-lg text-sm font-semibold transition-all duration-200 hover:bg-white/10 text-slate-200 flex items-center space-x-1.5">
+                        <i class="fa-solid fa-users"></i> <span>Clubs</span>
+                    </button>
+                    <button onclick="switchTab('directory')" id="nav-directory" class="nav-btn px-3 py-2 rounded-lg text-sm font-semibold transition-all duration-200 hover:bg-white/10 text-slate-200 flex items-center space-x-1.5">
+                        <i class="fa-solid fa-address-book"></i> <span>Directory</span>
+                    </button>
+                </nav>
+
+                <!-- Admin Mode Toggle & Mobile Menu Switch -->
+                <div class="flex items-center space-x-3">
+                    <!-- Admin Mode Pill -->
+                    <div class="flex items-center bg-slate-800/80 border border-slate-600 rounded-full p-1 pl-3 shadow-inner">
+                        <span class="text-xs font-semibold text-slate-300 mr-2 flex items-center">
+                            <i class="fa-solid fa-user-gear text-xs mr-1.5 text-lshs-brightGold"></i>
+                            <span id="admin-status-text">Student Mode</span>
+                        </span>
+                        <label class="relative inline-flex items-center cursor-pointer">
+                            <input type="checkbox" id="admin-toggle" onchange="handleAdminToggle()" class="sr-only peer">
+                            <div class="w-11 h-6 bg-slate-700 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-slate-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-lshs-gold"></div>
+                        </label>
+                    </div>
+
+                    <!-- Mobile Menu Button -->
+                    <button onclick="toggleMobileMenu()" class="md:hidden text-slate-200 hover:text-white p-2 rounded-lg focus:outline-none focus:ring-2 focus:ring-lshs-gold">
+                        <i class="fa-solid fa-bars text-xl" id="menu-icon"></i>
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Mobile Menu Dropdown -->
+        <div id="mobile-menu" class="hidden md:hidden bg-lshs-navy border-t border-slate-700 px-4 pt-2 pb-4 space-y-2">
+            <button onclick="switchTab('home')" class="mobile-nav-btn w-full text-left px-3 py-2.5 rounded-lg text-sm font-semibold text-white bg-white/10 flex items-center space-x-2">
+                <i class="fa-solid fa-house w-5 text-lshs-brightGold"></i> <span>Home / Dashboard</span>
+            </button>
+            <button onclick="switchTab('announcements')" class="mobile-nav-btn w-full text-left px-3 py-2.5 rounded-lg text-sm font-semibold text-slate-200 hover:bg-white/10 flex items-center space-x-2">
+                <i class="fa-solid fa-bullhorn w-5 text-lshs-brightGold"></i> <span>Announcements</span>
+            </button>
+            <button onclick="switchTab('calendar')" class="mobile-nav-btn w-full text-left px-3 py-2.5 rounded-lg text-sm font-semibold text-slate-200 hover:bg-white/10 flex items-center space-x-2">
+                <i class="fa-solid fa-calendar-days w-5 text-lshs-brightGold"></i> <span>Events Calendar</span>
+            </button>
+            <button onclick="switchTab('schedules')" class="mobile-nav-btn w-full text-left px-3 py-2.5 rounded-lg text-sm font-semibold text-slate-200 hover:bg-white/10 flex items-center space-x-2">
+                <i class="fa-solid fa-clock w-5 text-lshs-brightGold"></i> <span>Class Schedules</span>
+            </button>
+            <button onclick="switchTab('clubs')" class="mobile-nav-btn w-full text-left px-3 py-2.5 rounded-lg text-sm font-semibold text-slate-200 hover:bg-white/10 flex items-center space-x-2">
+                <i class="fa-solid fa-users w-5 text-lshs-brightGold"></i> <span>Clubs & Organizations</span>
+            </button>
+            <button onclick="switchTab('directory')" class="mobile-nav-btn w-full text-left px-3 py-2.5 rounded-lg text-sm font-semibold text-slate-200 hover:bg-white/10 flex items-center space-x-2">
+                <i class="fa-solid fa-address-book w-5 text-lshs-brightGold"></i> <span>School Directory</span>
+            </button>
+        </div>
+    </header>
+
+    <!-- Admin Notification Banner -->
+    <div id="admin-alert-banner" class="hidden bg-amber-500 text-slate-900 px-4 py-2 text-center text-xs sm:text-sm font-semibold shadow-inner no-print">
+        <i class="fa-solid fa-shield-halved mr-2"></i> Admin Mode Enabled: You can publish, edit, and delete announcements and calendar events.
+    </div>
+
+    <!-- MAIN CONTENT CONTAINER -->
+    <main class="flex-grow max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-6">
+
+        <!-- TAB 1: HOME / DASHBOARD PANEL -->
+        <section id="panel-home" class="space-y-6">
+            <!-- Welcome Hero Banner -->
+            <div class="bg-gradient-to-r from-lshs-navy via-lshs-blue to-slate-900 rounded-2xl p-6 sm:p-8 text-white shadow-xl relative overflow-hidden border-l-8 border-lshs-brightGold">
+                <div class="relative z-10 max-w-3xl">
+                    <div class="inline-flex items-center space-x-2 bg-white/10 backdrop-blur-md px-3 py-1 rounded-full text-xs font-semibold text-lshs-brightGold mb-3 border border-white/10">
+                        <i class="fa-solid fa-circle-check text-emerald-400"></i>
+                        <span>Official LSHS Cloud Information & Scheduling Portal</span>
+                    </div>
+                    <h1 class="text-2xl sm:text-4xl font-extrabold tracking-tight leading-tight">
+                        Welcome to <span class="text-lshs-brightGold">Schooldule</span>
+                    </h1>
+                    <p class="mt-2 text-sm sm:text-base text-slate-200 leading-relaxed">
+                        The consolidated single-source portal for Laguna Senior High School learners. Access real-time academic announcements, event schedules, strand timetables, and campus directory.
+                    </p>
+                    <div class="mt-5 flex flex-wrap gap-3">
+                        <button onclick="switchTab('announcements')" class="bg-lshs-gold hover:bg-amber-600 text-slate-950 px-4 py-2 rounded-lg font-bold text-sm shadow-md transition-all flex items-center space-x-2">
+                            <i class="fa-solid fa-bullhorn"></i> <span>View Announcements</span>
+                        </button>
+                        <button onclick="switchTab('schedules')" class="bg-white/10 hover:bg-white/20 text-white border border-white/20 px-4 py-2 rounded-lg font-semibold text-sm transition-all flex items-center space-x-2">
+                            <i class="fa-solid fa-calendar-week"></i> <span>Check Class Schedule</span>
+                        </button>
+                    </div>
+                </div>
+                <div class="absolute right-0 bottom-0 opacity-10 pointer-events-none transform translate-x-8 translate-y-8">
+                    <i class="fa-solid fa-school text-[220px]"></i>
+                </div>
+            </div>
+
+            <!-- Quick Stats Row -->
+            <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+                <div class="bg-white p-5 rounded-xl shadow-sm border border-slate-200 flex items-center space-x-4">
+                    <div class="w-12 h-12 rounded-lg bg-blue-100 text-lshs-blue flex items-center justify-center text-xl shrink-0">
+                        <i class="fa-solid fa-bullhorn"></i>
+                    </div>
+                    <div>
+                        <div class="text-2xl font-bold text-slate-900" id="stat-announcements-count">0</div>
+                        <div class="text-xs font-medium text-slate-500 uppercase tracking-wider">Announcements</div>
+                    </div>
+                </div>
+
+                <div class="bg-white p-5 rounded-xl shadow-sm border border-slate-200 flex items-center space-x-4">
+                    <div class="w-12 h-12 rounded-lg bg-amber-100 text-amber-700 flex items-center justify-center text-xl shrink-0">
+                        <i class="fa-solid fa-calendar-check"></i>
+                    </div>
+                    <div>
+                        <div class="text-2xl font-bold text-slate-900" id="stat-events-count">0</div>
+                        <div class="text-xs font-medium text-slate-500 uppercase tracking-wider">Upcoming Events</div>
+                    </div>
+                </div>
+
+                <div class="bg-white p-5 rounded-xl shadow-sm border border-slate-200 flex items-center space-x-4">
+                    <div class="w-12 h-12 rounded-lg bg-emerald-100 text-emerald-700 flex items-center justify-center text-xl shrink-0">
+                        <i class="fa-solid fa-users-viewfinder"></i>
+                    </div>
+                    <div>
+                        <div class="text-2xl font-bold text-slate-900" id="stat-clubs-count">6</div>
+                        <div class="text-xs font-medium text-slate-500 uppercase tracking-wider">Clubs & Orgs</div>
+                    </div>
+                </div>
+
+                <div class="bg-white p-5 rounded-xl shadow-sm border border-slate-200 flex items-center space-x-4">
+                    <div class="w-12 h-12 rounded-lg bg-rose-100 text-rose-700 flex items-center justify-center text-xl shrink-0">
+                        <i class="fa-solid fa-phone-volume"></i>
+                    </div>
+                    <div>
+                        <div class="text-2xl font-bold text-slate-900">24/7</div>
+                        <div class="text-xs font-medium text-slate-500 uppercase tracking-wider">Help & Hotline</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Two-Column Layout for Recent Updates & Calendar Glance -->
+            <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                <!-- Recent Announcements Preview -->
+                <div class="lg:col-span-2 space-y-4">
+                    <div class="flex items-center justify-between">
+                        <h2 class="text-lg font-bold text-slate-900 flex items-center">
+                            <i class="fa-solid fa-newspaper text-lshs-gold mr-2"></i> Recent Announcements
+                        </h2>
+                        <button onclick="switchTab('announcements')" class="text-xs font-bold text-lshs-blue hover:underline">
+                            View All <i class="fa-solid fa-arrow-right ml-1"></i>
+                        </button>
+                    </div>
+                    <div id="home-recent-announcements" class="space-y-3">
+                        <!-- Dynamic recent cards -->
+                    </div>
+                </div>
+
+                <!-- Upcoming Events Glance -->
+                <div class="space-y-4">
+                    <div class="flex items-center justify-between">
+                        <h2 class="text-lg font-bold text-slate-900 flex items-center">
+                            <i class="fa-solid fa-clock-rotate-left text-lshs-gold mr-2"></i> Upcoming Events
+                        </h2>
+                        <button onclick="switchTab('calendar')" class="text-xs font-bold text-lshs-blue hover:underline">
+                            Full Calendar <i class="fa-solid fa-arrow-right ml-1"></i>
+                        </button>
+                    </div>
+                    <div id="home-upcoming-events" class="bg-white rounded-xl shadow-sm border border-slate-200 p-4 divide-y divide-slate-100">
+                        <!-- Dynamic event items -->
+                    </div>
+
+                    <!-- Research Notice Card -->
+                    <div class="bg-slate-900 text-white p-4 rounded-xl shadow-md border-l-4 border-lshs-gold space-y-2">
+                        <div class="flex items-center justify-between">
+                            <span class="text-xs uppercase tracking-wider text-lshs-brightGold font-bold">LSHS Innovation Research</span>
+                            <i class="fa-solid fa-flask-vial text-slate-400"></i>
+                        </div>
+                        <h3 class="text-sm font-bold">Project Schooldule</h3>
+                        <p class="text-xs text-slate-300">
+                            Developing a centralized information system to minimize social media overload and empower LSHS students in academic planning.
+                        </p>
+                        <button onclick="openResearchModal()" class="text-xs text-lshs-brightGold font-semibold hover:underline block pt-1">
+                            <i class="fa-solid fa-circle-info mr-1"></i> View IPO Framework Details
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- TAB 2: CENTRALIZED ANNOUNCEMENTS PANEL -->
+        <section id="panel-announcements" class="hidden space-y-6">
+            <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 bg-white p-5 rounded-xl shadow-sm border border-slate-200">
+                <div>
+                    <h2 class="text-xl font-bold text-slate-900 flex items-center">
+                        <i class="fa-solid fa-bullhorn text-lshs-gold mr-2"></i> Centralized School Announcements
+                    </h2>
+                    <p class="text-xs text-slate-500">Official announcements synchronized with Supabase Cloud Database</p>
+                </div>
+                <div class="admin-only hidden">
+                    <button onclick="openAnnouncementModal()" class="bg-lshs-blue hover:bg-lshs-navy text-white px-4 py-2 rounded-lg font-bold text-sm shadow transition-all flex items-center justify-center space-x-2">
+                        <i class="fa-solid fa-plus"></i> <span>Post Announcement</span>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Filters & Search Bar -->
+            <div class="bg-white p-4 rounded-xl shadow-sm border border-slate-200 space-y-3">
+                <div class="flex flex-col md:flex-row gap-3">
+                    <div class="relative flex-grow">
+                        <i class="fa-solid fa-magnifying-glass absolute left-3.5 top-3 text-slate-400"></i>
+                        <input type="text" id="announcement-search" oninput="filterAnnouncements()" placeholder="Search announcements by title, keyword, or publisher..." class="w-full pl-10 pr-4 py-2 border border-slate-300 rounded-lg text-sm focus:ring-2 focus:ring-lshs-blue focus:outline-none">
+                    </div>
+                    <div class="flex items-center space-x-2 overflow-x-auto pb-1 md:pb-0">
+                        <span class="text-xs font-semibold text-slate-500 whitespace-nowrap"><i class="fa-solid fa-filter mr-1"></i> Target:</span>
+                        <select id="announcement-target-filter" onchange="filterAnnouncements()" class="border border-slate-300 rounded-lg text-sm px-3 py-2 bg-slate-50 focus:ring-2 focus:ring-lshs-blue">
+                            <option value="ALL">All Audiences</option>
+                            <option value="General">General School-Wide</option>
+                            <option value="Grade 11">Grade 11 Only</option>
+                            <option value="Grade 12">Grade 12 Only</option>
+                            <option value="STEM">STEM Strand</option>
+                            <option value="ABM">ABM Strand</option>
+                            <option value="HUMSS">HUMSS Strand</option>
+                            <option value="TVL">TVL Strand</option>
+                        </select>
+                    </div>
+                </div>
+
+                <!-- Category Tags Filter -->
+                <div class="flex flex-wrap gap-1.5 pt-1 border-t border-slate-100" id="announcement-category-tags">
+                    <button onclick="setCategoryFilter('ALL', this)" class="ann-cat-btn bg-lshs-navy text-white text-xs px-3 py-1 rounded-full font-medium">All Categories</button>
+                    <button onclick="setCategoryFilter('Academic', this)" class="ann-cat-btn bg-slate-100 text-slate-700 hover:bg-slate-200 text-xs px-3 py-1 rounded-full font-medium">Academic</button>
+                    <button onclick="setCategoryFilter('Urgent', this)" class="ann-cat-btn bg-slate-100 text-slate-700 hover:bg-slate-200 text-xs px-3 py-1 rounded-full font-medium">Urgent Notice</button>
+                    <button onclick="setCategoryFilter('Administrative', this)" class="ann-cat-btn bg-slate-100 text-slate-700 hover:bg-slate-200 text-xs px-3 py-1 rounded-full font-medium">Administrative</button>
+                    <button onclick="setCategoryFilter('Co-Curricular', this)" class="ann-cat-btn bg-slate-100 text-slate-700 hover:bg-slate-200 text-xs px-3 py-1 rounded-full font-medium">Co-Curricular</button>
+                </div>
+            </div>
+
+            <!-- Announcements List Grid -->
+            <div id="announcements-container" class="space-y-4">
+                <!-- Dynamic cards populated by JS -->
+            </div>
+        </section>
+
+        <!-- TAB 3: INTERACTIVE EVENTS CALENDAR PANEL -->
+        <section id="panel-calendar" class="hidden space-y-6">
+            <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 bg-white p-5 rounded-xl shadow-sm border border-slate-200">
+                <div>
+                    <h2 class="text-xl font-bold text-slate-900 flex items-center">
+                        <i class="fa-solid fa-calendar-days text-lshs-gold mr-2"></i> LSHS Interactive Events Calendar
+                    </h2>
+                    <p class="text-xs text-slate-500">Track academic examinations, submissions, school events, and official holidays</p>
+                </div>
+                <div class="flex items-center space-x-2">
+                    <div class="admin-only hidden">
+                        <button onclick="openEventModal()" class="bg-lshs-blue hover:bg-lshs-navy text-white px-4 py-2 rounded-lg font-bold text-sm shadow transition-all flex items-center space-x-2">
+                            <i class="fa-solid fa-calendar-plus"></i> <span>Add Event</span>
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Calendar Filter Legend -->
+            <div class="bg-white p-4 rounded-xl shadow-sm border border-slate-200 flex flex-wrap items-center justify-between gap-4">
+                <div class="flex flex-wrap items-center gap-3 text-xs">
+                    <span class="font-bold text-slate-700">Filter Categories:</span>
+                    <label class="inline-flex items-center cursor-pointer">
+                        <input type="checkbox" checked onchange="filterCalendarEvents()" value="Academic" class="cal-filter-type rounded text-blue-600 focus:ring-blue-500 mr-1.5">
+                        <span class="px-2 py-0.5 rounded bg-blue-100 text-blue-800 font-semibold">Academic</span>
+                    </label>
+                    <label class="inline-flex items-center cursor-pointer">
+                        <input type="checkbox" checked onchange="filterCalendarEvents()" value="Deadline" class="cal-filter-type rounded text-rose-600 focus:ring-rose-500 mr-1.5">
+                        <span class="px-2 py-0.5 rounded bg-rose-100 text-rose-800 font-semibold">Deadline</span>
+                    </label>
+                    <label class="inline-flex items-center cursor-pointer">
+                        <input type="checkbox" checked onchange="filterCalendarEvents()" value="Co-Curricular" class="cal-filter-type rounded text-emerald-600 focus:ring-emerald-500 mr-1.5">
+                        <span class="px-2 py-0.5 rounded bg-emerald-100 text-emerald-800 font-semibold">Co-Curricular</span>
+                    </label>
+                    <label class="inline-flex items-center cursor-pointer">
+                        <input type="checkbox" checked onchange="filterCalendarEvents()" value="Holiday" class="cal-filter-type rounded text-amber-600 focus:ring-amber-500 mr-1.5">
+                        <span class="px-2 py-0.5 rounded bg-amber-100 text-amber-800 font-semibold">Holiday</span>
+                    </label>
+                </div>
+                <div class="text-xs font-medium text-slate-500">
+                    Click any event to inspect detailed information
+                </div>
+            </div>
+
+            <!-- Month Controls Header -->
+            <div class="bg-lshs-navy text-white rounded-t-xl p-4 flex items-center justify-between">
+                <button onclick="changeCalendarMonth(-1)" class="p-2 hover:bg-white/10 rounded-lg transition-all text-lshs-brightGold font-semibold text-xs flex items-center space-x-1">
+                    <i class="fa-solid fa-chevron-left"></i> <span>Previous</span>
+                </button>
+                <h3 class="text-lg font-bold tracking-wide" id="calendar-month-year">October 2026</h3>
+                <button onclick="changeCalendarMonth(1)" class="p-2 hover:bg-white/10 rounded-lg transition-all text-lshs-brightGold font-semibold text-xs flex items-center space-x-1">
+                    <span>Next</span> <i class="fa-solid fa-chevron-right"></i>
+                </button>
+            </div>
+
+            <!-- Calendar Grid View -->
+            <div class="bg-white rounded-b-xl shadow-md border-x border-b border-slate-200 overflow-hidden">
+                <div class="grid grid-cols-7 border-b border-slate-200 bg-slate-50 text-center text-xs font-bold text-slate-600 py-2">
+                    <div>SUN</div>
+                    <div>MON</div>
+                    <div>TUE</div>
+                    <div>WED</div>
+                    <div>THU</div>
+                    <div>FRI</div>
+                    <div>SAT</div>
+                </div>
+                <div id="calendar-grid" class="grid grid-cols-7 auto-rows-fr divide-x divide-y divide-slate-200">
+                    <!-- Dynamic calendar grid -->
+                </div>
+            </div>
+        </section>
+
+        <!-- TAB 4: CLASS SCHEDULE SYSTEM PANEL -->
+        <section id="panel-schedules" class="hidden space-y-6">
+            <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 bg-white p-5 rounded-xl shadow-sm border border-slate-200">
+                <div>
+                    <h2 class="text-xl font-bold text-slate-900 flex items-center">
+                        <i class="fa-solid fa-clock text-lshs-gold mr-2"></i> Class Schedule System
+                    </h2>
+                    <p class="text-xs text-slate-500">Official section timetables, designated advisers, and room assignments</p>
+                </div>
+                <div class="flex items-center space-x-2 no-print">
+                    <button onclick="window.print()" class="bg-slate-800 hover:bg-slate-900 text-white px-4 py-2 rounded-lg font-bold text-sm shadow transition-all flex items-center space-x-2">
+                        <i class="fa-solid fa-print"></i> <span>Print Timetable</span>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Schedule Selector Toolbar -->
+            <div class="bg-white p-4 rounded-xl shadow-sm border border-slate-200 grid grid-cols-1 md:grid-cols-3 gap-4 no-print">
+                <div>
+                    <label class="block text-xs font-bold text-slate-700 uppercase mb-1">Grade Level</label>
+                    <select id="schedule-grade" onchange="updateSectionDropdown(); renderSchedule();" class="w-full border border-slate-300 rounded-lg px-3 py-2 text-sm bg-slate-50 focus:ring-2 focus:ring-lshs-blue">
+                        <option value="Grade 12" selected>Grade 12</option>
+                        <option value="Grade 11">Grade 11</option>
+                    </select>
+                </div>
+                <div>
+                    <label class="block text-xs font-bold text-slate-700 uppercase mb-1">Academic Strand</label>
+                    <select id="schedule-strand" onchange="updateSectionDropdown(); renderSchedule();" class="w-full border border-slate-300 rounded-lg px-3 py-2 text-sm bg-slate-50 focus:ring-2 focus:ring-lshs-blue">
+                        <option value="STEM" selected>STEM (Science, Tech, Eng, Math)</option>
+                        <option value="ABM">ABM (Accountancy, Business, Mgt)</option>
+                        <option value="HUMSS">HUMSS (Humanities & Social Sci)</option>
+                        <option value="TVL">TVL (Technical-Vocational-Livelihood)</option>
+                    </select>
+                </div>
+                <div>
+                    <label class="block text-xs font-bold text-slate-700 uppercase mb-1">Class Section</label>
+                    <select id="schedule-section" onchange="renderSchedule()" class="w-full border border-slate-300 rounded-lg px-3 py-2 text-sm bg-slate-50 focus:ring-2 focus:ring-lshs-blue">
+                        <!-- Options populated dynamically -->
+                    </select>
+                </div>
+            </div>
+
+            <!-- Schedule Output Header -->
+            <div class="bg-lshs-navy text-white rounded-t-xl p-5 flex flex-col sm:flex-row justify-between items-start sm:items-center border-b-2 border-lshs-gold">
+                <div>
+                    <h3 class="text-xl font-black text-lshs-brightGold" id="schedule-heading-section">STEM 12-A Timetable</h3>
+                    <p class="text-xs text-slate-300 mt-0.5" id="schedule-heading-adviser">Adviser: Engr. Mauricio C. Durante | Room 304 - Science Wing</p>
+                </div>
+                <div class="mt-2 sm:mt-0 text-right">
+                    <span class="text-xs bg-white/10 px-3 py-1 rounded-full font-semibold text-slate-200 border border-white/20">Term 3 • S.Y. 2026-2027</span>
+                </div>
+            </div>
+
+            <!-- Timetable Grid -->
+            <div class="bg-white rounded-b-xl shadow-md border-x border-b border-slate-200 overflow-x-auto">
+                <table class="w-full text-left border-collapse min-w-[700px]">
+                    <thead>
+                        <tr class="bg-slate-100 text-slate-700 text-xs font-bold uppercase border-b border-slate-200">
+                            <th class="p-3 w-28 border-r border-slate-200 text-center"><i class="fa-regular fa-clock mr-1"></i> Time</th>
+                            <th class="p-3 border-r border-slate-200 text-center w-1/5">Monday</th>
+                            <th class="p-3 border-r border-slate-200 text-center w-1/5">Tuesday</th>
+                            <th class="p-3 border-r border-slate-200 text-center w-1/5">Wednesday</th>
+                            <th class="p-3 border-r border-slate-200 text-center w-1/5">Thursday</th>
+                            <th class="p-3 text-center w-1/5">Friday</th>
+                        </tr>
+                    </thead>
+                    <tbody id="schedule-table-body" class="divide-y divide-slate-200 text-xs">
+                        <!-- Schedule rows populated dynamically -->
+                    </tbody>
+                </table>
+            </div>
+        </section>
+
+        <!-- TAB 5: CLUBS & ORGANIZATIONS DIRECTORY PANEL -->
+        <section id="panel-clubs" class="hidden space-y-6">
+            <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 bg-white p-5 rounded-xl shadow-sm border border-slate-200">
+                <div>
+                    <h2 class="text-xl font-bold text-slate-900 flex items-center">
+                        <i class="fa-solid fa-users text-lshs-gold mr-2"></i> Clubs & Organizations Directory
+                    </h2>
+                    <p class="text-xs text-slate-500">Explore accredited LSHS organizations, executive student officers, and meeting hours</p>
+                </div>
+                <div class="w-full sm:w-auto">
+                    <input type="text" id="club-search" oninput="renderClubs()" placeholder="Search clubs or advisers..." class="border border-slate-300 rounded-lg text-sm px-3 py-2 w-full sm:w-64 focus:ring-2 focus:ring-lshs-blue">
+                </div>
+            </div>
+
+            <!-- Clubs Grid -->
+            <div id="clubs-container" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                <!-- Club cards populated dynamically -->
+            </div>
+        </section>
+
+        <!-- TAB 6: SCHOOL INFORMATION DIRECTORY PANEL -->
+        <section id="panel-directory" class="hidden space-y-6">
+            <div class="bg-white p-5 rounded-xl shadow-sm border border-slate-200">
+                <h2 class="text-xl font-bold text-slate-900 flex items-center">
+                    <i class="fa-solid fa-address-book text-lshs-gold mr-2"></i> School Information Directory
+                </h2>
+                <p class="text-xs text-slate-500">Administrative contact lines, emergency hotlines, department heads, and consultation schedules</p>
+            </div>
+
+            <!-- Emergency Hotline Banner -->
+            <div class="bg-gradient-to-r from-rose-600 to-rose-800 text-white p-5 rounded-xl shadow-md space-y-3">
+                <div class="flex items-center space-x-2">
+                    <i class="fa-solid fa-triangle-exclamation text-amber-300 text-xl"></i>
+                    <h3 class="font-extrabold text-lg">LSHS Emergency & Crisis Hotlines</h3>
+                </div>
+                <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 text-xs font-medium">
+                    <div class="bg-white/10 p-3 rounded-lg border border-white/20">
+                        <span class="block text-slate-200 font-bold">Campus Clinic Hotline</span>
+                        <span class="text-base font-extrabold text-amber-300"><i class="fa-solid fa-phone mr-1"></i> (049) 501-8811</span>
+                    </div>
+                    <div class="bg-white/10 p-3 rounded-lg border border-white/20">
+                        <span class="block text-slate-200 font-bold">Guidance & Counseling</span>
+                        <span class="text-base font-extrabold text-amber-300"><i class="fa-solid fa-phone mr-1"></i> (049) 501-8822</span>
+                    </div>
+                    <div class="bg-white/10 p-3 rounded-lg border border-white/20">
+                        <span class="block text-slate-200 font-bold">Disaster Risk Mgmt (DRRM)</span>
+                        <span class="text-base font-extrabold text-amber-300"><i class="fa-solid fa-phone mr-1"></i> (049) 501-9999</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                <!-- Administrative Offices (2 Cols) -->
+                <div class="lg:col-span-2 space-y-4">
+                    <h3 class="text-base font-bold text-slate-900 flex items-center">
+                        <i class="fa-solid fa-building-columns text-lshs-blue mr-2"></i> Administrative Offices
+                    </h3>
+                    <div id="office-directory-container" class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                        <!-- Dynamic offices -->
+                    </div>
+
+                    <!-- Faculty Consultation Hours Section -->
+                    <h3 class="text-base font-bold text-slate-900 flex items-center pt-4">
+                        <i class="fa-solid fa-chalkboard-user text-lshs-blue mr-2"></i> Department Heads & Key Faculty
+                    </h3>
+                    <div class="bg-white rounded-xl shadow-sm border border-slate-200 p-4 overflow-x-auto">
+                        <table class="w-full text-left text-xs">
+                            <thead>
+                                <tr class="bg-slate-100 text-slate-700 font-bold uppercase border-b border-slate-200">
+                                    <th class="p-2.5">Faculty Member</th>
+                                    <th class="p-2.5">Department</th>
+                                    <th class="p-2.5">Consultation Hours</th>
+                                    <th class="p-2.5">Contact Email</th>
+                                </tr>
+                            </thead>
+                            <tbody class="divide-y divide-slate-100" id="faculty-directory-body">
+                                <!-- Dynamic faculty rows -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <!-- Forms & Quick Links (1 Col) -->
+                <div class="space-y-4">
+                    <h3 class="text-base font-bold text-slate-900 flex items-center">
+                        <i class="fa-solid fa-folder-open text-lshs-blue mr-2"></i> Forms & Resources
+                    </h3>
+                    <div class="bg-white rounded-xl shadow-sm border border-slate-200 p-4 space-y-3">
+                        <button onclick="alert('Downloading LSHS Student Handbook (PDF preview)')" class="w-full text-left flex items-center justify-between p-3 rounded-lg border border-slate-200 hover:bg-slate-50 transition-all text-xs font-semibold text-slate-800">
+                            <span class="flex items-center"><i class="fa-solid fa-file-pdf text-rose-500 mr-2.5 text-base"></i> Official LSHS Student Handbook</span>
+                            <i class="fa-solid fa-download text-slate-400"></i>
+                        </button>
+                        <button onclick="alert('Opening Student Clearance Form')" class="w-full text-left flex items-center justify-between p-3 rounded-lg border border-slate-200 hover:bg-slate-50 transition-all text-xs font-semibold text-slate-800">
+                            <span class="flex items-center"><i class="fa-solid fa-file-contract text-blue-500 mr-2.5 text-base"></i> Student Clearance Form</span>
+                            <i class="fa-solid fa-arrow-up-right-from-square text-slate-400"></i>
+                        </button>
+                        <button onclick="alert('Opening Club Recognition Form')" class="w-full text-left flex items-center justify-between p-3 rounded-lg border border-slate-200 hover:bg-slate-50 transition-all text-xs font-semibold text-slate-800">
+                            <span class="flex items-center"><i class="fa-solid fa-file-lines text-emerald-500 mr-2.5 text-base"></i> Club Recognition Form</span>
+                            <i class="fa-solid fa-arrow-up-right-from-square text-slate-400"></i>
+                        </button>
+                        <button onclick="alert('Opening Form 137 Request Portal')" class="w-full text-left flex items-center justify-between p-3 rounded-lg border border-slate-200 hover:bg-slate-50 transition-all text-xs font-semibold text-slate-800">
+                            <span class="flex items-center"><i class="fa-solid fa-graduation-cap text-amber-500 mr-2.5 text-base"></i> Form 137 / Document Request</span>
+                            <i class="fa-solid fa-arrow-up-right-from-square text-slate-400"></i>
+                        </button>
+                    </div>
+
+                    <!-- Research Evaluation Methodology -->
+                    <div class="bg-slate-50 rounded-xl p-4 border border-slate-200 text-xs space-y-2 text-slate-600">
+                        <span class="font-bold text-slate-900 block">Research Evaluation Metrics</span>
+                        <p>
+                            Evaluated using a 4-point Likert scale across key criteria: User Accessibility, Ease of Navigation, Clarity of Information, User-friendliness, and Data Security.
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+    </main>
+
+    <!-- FOOTER -->
+    <footer class="bg-lshs-navy text-white py-8 border-t-4 border-lshs-gold mt-12 no-print">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col md:flex-row items-center justify-between gap-4">
+            <div class="flex items-center space-x-3">
+                <div class="bg-white p-2 rounded-full text-lshs-navy font-bold text-lg w-10 h-10 flex items-center justify-center">
+                    <i class="fa-solid fa-graduation-cap"></i>
+                </div>
+                <div>
+                    <h4 class="font-bold text-sm">Schooldule - Laguna Senior High School</h4>
+                    <p class="text-xs text-slate-400">Science Innovation Research Plan • Centralized SMIS Portal</p>
+                </div>
+            </div>
+            <div class="text-xs text-slate-400 text-center md:text-right space-y-1">
+                <p>Researchers: Durante, Advento, Amador, Belmes, Chingtoco, Concio, Namuag, Pasco</p>
+                <p>&copy; 2026 Laguna Senior High School. All rights reserved.</p>
+            </div>
+        </div>
+    </footer>
+
+    <!-- MODAL 1: ADMIN PIN VERIFICATION MODAL -->
+    <div id="modal-admin-pin" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm hidden flex items-center justify-center z-50 p-4">
+        <div class="bg-white rounded-2xl shadow-2xl max-w-sm w-full overflow-hidden border border-slate-200 animate-fadeIn">
+            <div class="bg-lshs-navy text-white px-6 py-4 flex items-center justify-between">
+                <h3 class="font-bold text-sm flex items-center">
+                    <i class="fa-solid fa-key text-lshs-brightGold mr-2"></i> Enter Admin Passcode
+                </h3>
+                <button onclick="closeAdminPinModal()" class="text-slate-300 hover:text-white"><i class="fa-solid fa-xmark text-lg"></i></button>
+            </div>
+            <form onsubmit="verifyAdminPin(event)" class="p-6 space-y-4">
+                <p class="text-xs text-slate-600">Please enter the administrative security PIN to grant management rights:</p>
+                <div>
+                    <input type="password" id="admin-pin-input" required maxlength="6" placeholder="Enter PIN (Default: 1234)" class="w-full border border-slate-300 text-center text-lg tracking-widest font-bold rounded-lg px-3 py-2 focus:ring-2 focus:ring-lshs-blue focus:outline-none">
+                </div>
+                <div id="admin-pin-error" class="hidden text-xs text-rose-600 font-semibold text-center">
+                    <i class="fa-solid fa-circle-exclamation mr-1"></i> Incorrect Security PIN!
+                </div>
+                <div class="flex items-center justify-end space-x-2 pt-2">
+                    <button type="button" onclick="closeAdminPinModal()" class="px-4 py-2 border border-slate-300 text-slate-700 rounded-lg font-bold text-xs hover:bg-slate-100">Cancel</button>
+                    <button type="submit" class="px-4 py-2 bg-lshs-gold hover:bg-amber-600 text-slate-950 rounded-lg font-bold text-xs shadow">Verify PIN</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- MODAL 2: POST / EDIT ANNOUNCEMENT MODAL -->
+    <div id="modal-announcement" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm hidden flex items-center justify-center z-50 p-4">
+        <div class="bg-white rounded-2xl shadow-2xl max-w-lg w-full overflow-hidden border border-slate-200 animate-fadeIn">
+            <div class="bg-lshs-navy text-white px-6 py-4 flex items-center justify-between">
+                <h3 class="font-bold text-base flex items-center" id="announcement-modal-title">
+                    <i class="fa-solid fa-bullhorn text-lshs-brightGold mr-2"></i> Post New Announcement
+                </h3>
+                <button onclick="closeAnnouncementModal()" class="text-slate-300 hover:text-white"><i class="fa-solid fa-xmark text-lg"></i></button>
+            </div>
+            <form id="announcement-form" onsubmit="saveAnnouncement(event)" class="p-6 space-y-4">
+                <input type="hidden" id="ann-id">
+                <div>
+                    <label class="block text-xs font-bold text-slate-700 uppercase mb-1">Title</label>
+                    <input type="text" id="ann-title" required placeholder="e.g. Midterm Examination Guidelines" class="w-full border border-slate-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-lshs-blue">
+                </div>
+                <div class="grid grid-cols-2 gap-3">
+                    <div>
+                        <label class="block text-xs font-bold text-slate-700 uppercase mb-1">Category Tag</label>
+                        <select id="ann-category" class="w-full border border-slate-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-lshs-blue">
+                            <option value="Academic">Academic</option>
+                            <option value="Urgent">Urgent Notice</option>
+                            <option value="Administrative">Administrative</option>
+                            <option value="Co-Curricular">Co-Curricular</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block text-xs font-bold text-slate-700 uppercase mb-1">Target Audience</label>
+                        <select id="ann-target" class="w-full border border-slate-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-lshs-blue">
+                            <option value="General">General (All Students)</option>
+                            <option value="Grade 11">Grade 11 Only</option>
+                            <option value="Grade 12">Grade 12 Only</option>
+                            <option value="STEM">STEM Strand</option>
+                            <option value="ABM">ABM Strand</option>
+                            <option value="HUMSS">HUMSS Strand</option>
+                            <option value="TVL">TVL Strand</option>
+                        </select>
+                    </div>
+                </div>
+                <div>
+                    <label class="block text-xs font-bold text-slate-700 uppercase mb-1">Content Body</label>
+                    <textarea id="ann-body" required rows="4" placeholder="Enter full announcement details here..." class="w-full border border-slate-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-lshs-blue"></textarea>
+                </div>
+                <div>
+                    <label class="block text-xs font-bold text-slate-700 uppercase mb-1">Publisher / Author Office</label>
+                    <input type="text" id="ann-author" required placeholder="e.g. Office of the Principal" class="w-full border border-slate-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-lshs-blue">
+                </div>
+                <div class="pt-2 flex items-center justify-end space-x-2">
+                    <button type="button" onclick="closeAnnouncementModal()" class="px-4 py-2 border border-slate-300 text-slate-700 rounded-lg font-bold text-xs hover:bg-slate-100">Cancel</button>
+                    <button type="submit" class="px-4 py-2 bg-lshs-blue hover:bg-lshs-navy text-white rounded-lg font-bold text-xs shadow">Publish Post</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- MODAL 3: ADD / EDIT EVENT MODAL -->
+    <div id="modal-event" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm hidden flex items-center justify-center z-50 p-4">
+        <div class="bg-white rounded-2xl shadow-2xl max-w-md w-full overflow-hidden border border-slate-200 animate-fadeIn">
+            <div class="bg-lshs-navy text-white px-6 py-4 flex items-center justify-between">
+                <h3 class="font-bold text-base flex items-center">
+                    <i class="fa-solid fa-calendar-plus text-lshs-brightGold mr-2"></i> Schedule School Event
+                </h3>
+                <button onclick="closeEventModal()" class="text-slate-300 hover:text-white"><i class="fa-solid fa-xmark text-lg"></i></button>
+            </div>
+            <form id="event-form" onsubmit="saveEvent(event)" class="p-6 space-y-4">
+                <div>
+                    <label class="block text-xs font-bold text-slate-700 uppercase mb-1">Event Title</label>
+                    <input type="text" id="evt-title" required placeholder="e.g. STEM Research Colloquium" class="w-full border border-slate-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-lshs-blue">
+                </div>
+                <div class="grid grid-cols-2 gap-3">
+                    <div>
+                        <label class="block text-xs font-bold text-slate-700 uppercase mb-1">Date</label>
+                        <input type="date" id="evt-date" required class="w-full border border-slate-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-lshs-blue">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-bold text-slate-700 uppercase mb-1">Category</label>
+                        <select id="evt-category" class="w-full border border-slate-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-lshs-blue">
+                            <option value="Academic">Academic</option>
+                            <option value="Deadline">Deadline</option>
+                            <option value="Co-Curricular">Co-Curricular</option>
+                            <option value="Holiday">Holiday</option>
+                        </select>
+                    </div>
+                </div>
+                <div>
+                    <label class="block text-xs font-bold text-slate-700 uppercase mb-1">Location / Venue</label>
+                    <input type="text" id="evt-location" required placeholder="e.g. School Gymnasium / AVR" class="w-full border border-slate-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-lshs-blue">
+                </div>
+                <div>
+                    <label class="block text-xs font-bold text-slate-700 uppercase mb-1">Description / Notes</label>
+                    <textarea id="evt-desc" rows="3" placeholder="Additional instructions for learners..." class="w-full border border-slate-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-lshs-blue"></textarea>
+                </div>
+                <div class="pt-2 flex items-center justify-end space-x-2">
+                    <button type="button" onclick="closeEventModal()" class="px-4 py-2 border border-slate-300 text-slate-700 rounded-lg font-bold text-xs hover:bg-slate-100">Cancel</button>
+                    <button type="submit" class="px-4 py-2 bg-lshs-blue hover:bg-lshs-navy text-white rounded-lg font-bold text-xs shadow">Save Event</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- MODAL 4: VIEW EVENT DETAILS MODAL -->
+    <div id="modal-event-detail" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm hidden flex items-center justify-center z-50 p-4">
+        <div class="bg-white rounded-2xl shadow-2xl max-w-md w-full overflow-hidden border border-slate-200 animate-fadeIn">
+            <div class="bg-lshs-navy text-white px-6 py-4 flex items-center justify-between">
+                <span class="text-xs font-bold px-2.5 py-1 rounded-full uppercase" id="evt-detail-badge">Academic</span>
+                <button onclick="closeEventDetailModal()" class="text-slate-300 hover:text-white"><i class="fa-solid fa-xmark text-lg"></i></button>
+            </div>
+            <div class="p-6 space-y-4">
+                <h3 class="text-xl font-extrabold text-slate-900" id="evt-detail-title">Event Title</h3>
+                <div class="space-y-2 text-xs text-slate-600 bg-slate-50 p-3 rounded-lg border border-slate-200">
+                    <p class="flex items-center"><i class="fa-solid fa-calendar w-5 text-lshs-gold"></i> <span id="evt-detail-date" class="font-semibold text-slate-800">Date</span></p>
+                    <p class="flex items-center"><i class="fa-solid fa-location-dot w-5 text-lshs-gold"></i> <span id="evt-detail-location" class="font-semibold text-slate-800">Location</span></p>
+                </div>
+                <p class="text-sm text-slate-700 leading-relaxed" id="evt-detail-desc">Description details...</p>
+                <div class="pt-2 flex items-center justify-between border-t border-slate-100">
+                    <div id="evt-detail-admin-actions" class="admin-only hidden">
+                        <button onclick="deleteCurrentEvent()" class="text-xs text-rose-600 hover:underline font-bold"><i class="fa-solid fa-trash mr-1"></i> Delete Event</button>
+                    </div>
+                    <button onclick="closeEventDetailModal()" class="ml-auto px-4 py-2 bg-slate-800 text-white rounded-lg font-bold text-xs hover:bg-slate-900">Close</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- MODAL 5: RESEARCH PLAN / IPO MODEL DETAILS MODAL -->
+    <div id="modal-research" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm hidden flex items-center justify-center z-50 p-4">
+        <div class="bg-white rounded-2xl shadow-2xl max-w-2xl w-full max-h-[85vh] overflow-y-auto border border-slate-200 animate-fadeIn">
+            <div class="bg-lshs-navy text-white px-6 py-4 flex items-center justify-between sticky top-0 z-10">
+                <h3 class="font-bold text-base flex items-center">
+                    <i class="fa-solid fa-flask-vial text-lshs-brightGold mr-2"></i> LSHS Research Framework (IPO Model)
+                </h3>
+                <button onclick="closeResearchModal()" class="text-slate-300 hover:text-white"><i class="fa-solid fa-xmark text-lg"></i></button>
+            </div>
+            <div class="p-6 space-y-5 text-xs text-slate-700">
+                <div class="bg-blue-50 border-l-4 border-lshs-blue p-4 rounded-r-lg">
+                    <h4 class="font-bold text-sm text-lshs-navy">DEVELOPMENT OF CENTRALIZED SCHOOL INFORMATION AND SCHEDULING WEBSITE FOR LAGUNA SENIOR HIGH SCHOOL STUDENTS</h4>
+                    <p class="mt-1 text-slate-600">Category: Science Innovation | Lead Researchers: Durante, Advento, Amador, Belmes, Chingtoco, Concio, Namuag, Pasco</p>
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                    <div class="border border-slate-200 p-3.5 rounded-xl bg-slate-50 space-y-2">
+                        <span class="font-bold text-lshs-navy uppercase block border-b pb-1">1. INPUT</span>
+                        <ul class="list-disc list-inside space-y-1">
+                            <li>Respondent Demographics</li>
+                            <li>School Announcements Data</li>
+                            <li>Class Section Schedules</li>
+                            <li>Clubs & Info Directory</li>
+                            <li>Supabase Cloud DB Credentials</li>
+                        </ul>
+                    </div>
+
+                    <div class="border border-slate-200 p-3.5 rounded-xl bg-slate-50 space-y-2">
+                        <span class="font-bold text-lshs-navy uppercase block border-b pb-1">2. PROCESS</span>
+                        <ul class="list-disc list-inside space-y-1">
+                            <li>Portal Framework Coding</li>
+                            <li>Website Testing Phase (1 Mo.)</li>
+                            <li>Data Gathering (Likert Scale)</li>
+                            <li>Descriptive & Paired T-Test</li>
+                            <li>Interface Optimization</li>
+                        </ul>
+                    </div>
+
+                    <div class="border border-slate-200 p-3.5 rounded-xl bg-slate-50 space-y-2">
+                        <span class="font-bold text-lshs-navy uppercase block border-b pb-1">3. OUTPUT</span>
+                        <ul class="list-disc list-inside space-y-1">
+                            <li>High User Accessibility</li>
+                            <li>Ease of Information Retrieval</li>
+                            <li>Reduced Social Media Overload</li>
+                            <li>Higher Academic Planning Efficiency</li>
+                        </ul>
+                    </div>
+                </div>
+
+                <div class="pt-2 text-right">
+                    <button onclick="closeResearchModal()" class="px-4 py-2 bg-slate-800 text-white rounded-lg font-bold">Close Research Details</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Supabase Initialization with Safe Fallback Check
+        const SUPABASE_URL = "https://ibmhjtyeebgemfmciiea.supabase.co";
+        const SUPABASE_ANON_KEY = "sb_publishable_i7aTNjU0VTn4n1mK_b9Cjg_6gs_dUOg";
+
+        let supabaseClient = null;
+        if (window.supabase && typeof window.supabase.createClient === 'function') {
+            try {
+                supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+                console.log("Supabase client initialized successfully.");
+            } catch (err) {
+                console.warn("Supabase initialization error, falling back to local mode:", err);
+            }
+        } else {
+            console.warn("Supabase CDN not loaded. Running in local fallback mode.");
+        }
+
+        // Default Data for Laguna Senior High School
+        const DEFAULT_DATA = {
+            announcements: [
+                {
+                    id: 'ann-1',
+                    title: 'Schedule of Term 3 Midterm Examinations S.Y. 2026-2027',
+                    category: 'Academic',
+                    target: 'General',
+                    date: '2026-10-10',
+                    author: 'Office of the Academic Director',
+                    body: 'Please be informed that the Term 3 Midterm Examinations will officially commence on October 22 to October 24, 2026. All learners are advised to clear library accounts and secure examination permits from the Finance office.'
+                },
+                {
+                    id: 'ann-2',
+                    title: 'STEM Science & Innovation Research Fair 2026 Registration',
+                    category: 'Co-Curricular',
+                    target: 'STEM',
+                    date: '2026-10-08',
+                    author: 'Science Department & STEM Guild',
+                    body: 'All Grade 11 and Grade 12 STEM research groups are required to submit finalized research posters and proposal documentation to the Science Department by October 18, 2026.'
+                },
+                {
+                    id: 'ann-3',
+                    title: 'Urgent: Flag Ceremony Schedule & Uniform Guidelines',
+                    category: 'Urgent',
+                    target: 'General',
+                    date: '2026-10-05',
+                    author: 'Office of Student Affairs',
+                    body: 'Monday Flag Ceremony will start strictly at 7:15 AM at the LSHS Main Gymnasium. Complete prescribed school uniform with proper student ID card must be worn at all times.'
+                },
+                {
+                    id: 'ann-4',
+                    title: 'ABM Entrepreneurship Food & Trade Bazaar Briefing',
+                    category: 'Academic',
+                    target: 'ABM',
+                    date: '2026-10-02',
+                    author: 'ABM Strand Management',
+                    body: 'Orientation for Grade 12 ABM Enterprise groups will take place at the AVR on Friday at 2:00 PM. Booth allocation and food safety permits will be discussed.'
+                }
+            ],
+            events: [
+                {
+                    id: 'evt-1',
+                    title: 'LSHS General Club Fair 2026',
+                    date: '2026-10-15',
+                    category: 'Co-Curricular',
+                    location: 'Main Gymnasium',
+                    desc: 'Annual organization recruitment fair. Explore clubs, register for membership, and join student organizations!'
+                },
+                {
+                    id: 'evt-2',
+                    title: 'Term 3 Midterm Examinations',
+                    date: '2026-10-22',
+                    category: 'Academic',
+                    location: 'All Classrooms',
+                    desc: 'Comprehensive midterm assessments across all strands (STEM, ABM, HUMSS, TVL).'
+                },
+                {
+                    id: 'evt-3',
+                    title: 'STEM Capstone Proposal Submission',
+                    date: '2026-10-18',
+                    category: 'Deadline',
+                    location: 'Science Research Office',
+                    desc: 'Hard copy submission of Research Proposals and IPO Frameworks for Grade 12 STEM groups.'
+                },
+                {
+                    id: 'evt-4',
+                    title: 'Barangay/Local Holiday - No Classes',
+                    date: '2026-10-26',
+                    category: 'Holiday',
+                    location: 'Campus-wide',
+                    desc: 'Official local holiday. School offices and classes will be suspended.'
+                }
+            ],
+            schedules: {
+                "Grade 12": {
+                    "STEM": {
+                        "STEM 12-A": {
+                            adviser: "Engr. Mauricio C. Durante",
+                            room: "Room 304 - Science Wing",
+                            timetable: [
+                                { time: "07:30 - 08:30 AM", mon: "General Physics 2", tue: "General Chemistry 2", wed: "General Physics 2", thu: "General Chemistry 2", fri: "Homeroom / Consultation" },
+                                { time: "08:30 - 09:30 AM", mon: "Calculus / Research", tue: "General Biology 2", wed: "Calculus / Research", thu: "General Biology 2", fri: "Practical Research 2" },
+                                { time: "09:30 - 10:00 AM", mon: "RECESS", tue: "RECESS", wed: "RECESS", thu: "RECESS", fri: "RECESS" },
+                                { time: "10:00 - 11:00 AM", mon: "Empowerment Tech", tue: "Media & Info Literacy", wed: "Empowerment Tech", thu: "Media & Info Literacy", fri: "STEM Innovation Lab" },
+                                { time: "11:00 - 12:00 PM", mon: "Contemporary Arts", tue: "Physical Education 4", wed: "Contemporary Arts", thu: "Physical Education 4", fri: "SSLG / Club Hours" }
+                            ]
+                        },
+                        "STEM 12-B": {
+                            adviser: "Ms. Blessy Abiegem Advento",
+                            room: "Room 305 - Science Wing",
+                            timetable: [
+                                { time: "07:30 - 08:30 AM", mon: "General Biology 2", tue: "General Physics 2", wed: "General Biology 2", thu: "General Physics 2", fri: "Homeroom / Consultation" },
+                                { time: "08:30 - 09:30 AM", mon: "General Chemistry 2", tue: "Calculus / Research", wed: "General Chemistry 2", thu: "Calculus / Research", fri: "Practical Research 2" },
+                                { time: "09:30 - 10:00 AM", mon: "RECESS", tue: "RECESS", wed: "RECESS", thu: "RECESS", fri: "RECESS" },
+                                { time: "10:00 - 11:00 AM", mon: "Media & Info Literacy", tue: "Empowerment Tech", wed: "Media & Info Literacy", thu: "Empowerment Tech", fri: "STEM Innovation Lab" },
+                                { time: "11:00 - 12:00 PM", mon: "Physical Education 4", tue: "Contemporary Arts", wed: "Physical Education 4", thu: "Contemporary Arts", fri: "SSLG / Club Hours" }
+                            ]
+                        }
+                    },
+                    "ABM": {
+                        "ABM 12-A": {
+                            adviser: "Mr. Mark Adrian Amador",
+                            room: "Room 201 - Business Wing",
+                            timetable: [
+                                { time: "07:30 - 08:30 AM", mon: "Business Ethics", tue: "Principles of Marketing", wed: "Business Ethics", thu: "Principles of Marketing", fri: "Homeroom / Consultation" },
+                                { time: "08:30 - 09:30 AM", mon: "Fundamentals of ABM", tue: "Business Finance", wed: "Fundamentals of ABM", thu: "Business Finance", fri: "Business Enterprise Practicum" },
+                                { time: "09:30 - 10:00 AM", mon: "RECESS", tue: "RECESS", wed: "RECESS", thu: "RECESS", fri: "RECESS" },
+                                { time: "10:00 - 11:00 AM", mon: "Applied Economics", tue: "Business Math", wed: "Applied Economics", thu: "Business Math", fri: "Entrepreneurship Lab" },
+                                { time: "11:00 - 12:00 PM", mon: "Physical Education 4", tue: "Contemporary Arts", wed: "Physical Education 4", thu: "Contemporary Arts", fri: "Club / Org Time" }
+                            ]
+                        }
+                    },
+                    "HUMSS": {
+                        "HUMSS 12-A": {
+                            adviser: "Ms. Maria Andrea Chingtoco",
+                            room: "Room 102 - Humanities Hall",
+                            timetable: [
+                                { time: "07:30 - 08:30 AM", mon: "Creative Writing", tue: "World Religions", wed: "Creative Writing", thu: "World Religions", fri: "Homeroom / Consultation" },
+                                { time: "08:30 - 09:30 AM", mon: "Philippine Politics", tue: "Disciplines in Soc Sci", wed: "Philippine Politics", thu: "Disciplines in Soc Sci", fri: "HUMSS Culminating Activity" }
+                            ]
+                        }
+                    },
+                    "TVL": {
+                        "TVL-ICT 12": {
+                            adviser: "Mr. Jedidiah Belmes",
+                            room: "Computer Laboratory 2",
+                            timetable: [
+                                { time: "07:30 - 09:30 AM", mon: "Computer Programming", tue: "Web Development", wed: "Computer Programming", thu: "Web Development", fri: "IT System Maintenance" }
+                            ]
+                        }
+                    }
+                },
+                "Grade 11": {
+                    "STEM": {
+                        "STEM 11-A": {
+                            adviser: "Ms. Hanna Rose Namuag",
+                            room: "Room 301 - Science Wing",
+                            timetable: [
+                                { time: "07:30 - 08:30 AM", mon: "General Mathematics", tue: "Earth Science", wed: "General Mathematics", thu: "Earth Science", fri: "Homeroom" },
+                                { time: "08:30 - 09:30 AM", mon: "Oral Communication", tue: "Pre-Calculus", wed: "Oral Communication", thu: "Pre-Calculus", fri: "Practical Research 1" }
+                            ]
+                        }
+                    }
+                }
+            },
+            clubs: [
+                {
+                    name: "Supreme Secondary Learner Government (SSLG)",
+                    category: "Governance",
+                    adviser: "Mr. Mark Adrian Amador",
+                    president: "Resha Mae E. Pasco",
+                    schedule: "Every Tuesday 3:30 PM",
+                    desc: "The highest student governing body in Laguna Senior High School committed to learner welfare, leadership development, and campus representation.",
+                    icon: "fa-crown",
+                    color: "bg-amber-500"
+                },
+                {
+                    name: "LSHS Science & Research Guild",
+                    category: "Academic",
+                    adviser: "Engr. Mauricio Nicholas Durante",
+                    president: "Cherry Anne Concio",
+                    schedule: "Every Wednesday 4:00 PM",
+                    desc: "Fostering scientific inquiry, robotics, innovation, and guiding LSHS students in regional research congresses.",
+                    icon: "fa-atom",
+                    color: "bg-blue-600"
+                },
+                {
+                    name: "Mathematics Society",
+                    category: "Academic",
+                    adviser: "Ms. Blessy Abiegem Advento",
+                    president: "Jedidiah Belmes",
+                    schedule: "Every Thursday 3:30 PM",
+                    desc: "Promoting problem-solving excellence, peer tutoring in calculus, and representing LSHS in Math Olympiads.",
+                    icon: "fa-calculator",
+                    color: "bg-indigo-600"
+                },
+                {
+                    name: "Arts, Culture & Theater Guild",
+                    category: "Culture",
+                    adviser: "Ms. Maria Andrea Chingtoco",
+                    president: "Hanna Rose Namuag",
+                    schedule: "Fridays 3:30 PM",
+                    desc: "Uniting visual artists, performers, and creative writers to enrich the cultural atmosphere of LSHS.",
+                    icon: "fa-palette",
+                    color: "bg-purple-600"
+                },
+                {
+                    name: "Red Cross Youth - LSHS Chapter",
+                    category: "Service",
+                    adviser: "Ms. Cherry Anne Concio",
+                    president: "Blessy Abiegem Advento",
+                    schedule: "1st & 3rd Monday 4:00 PM",
+                    desc: "Dedicated to first aid training, campus safety, health promotion, and community bloodletting advocacies.",
+                    icon: "fa-kit-medical",
+                    color: "bg-rose-600"
+                },
+                {
+                    name: "IT & Digital Innovators Club",
+                    category: "Technology",
+                    adviser: "Mr. Jedidiah Belmes",
+                    president: "Mauricio Nicholas Durante",
+                    schedule: "Wednesdays 3:30 PM",
+                    desc: "Exploring web development, software engineering, UI/UX design, and supporting system projects like Schooldule.",
+                    icon: "fa-laptop-code",
+                    color: "bg-emerald-600"
+                }
+            ],
+            offices: [
+                { name: "Office of the School Principal", head: "Dr. Roberto M. Santos", email: "principal@lshs.edu.ph", loc: "Admin Bldg, 2nd Floor", phone: "(049) 501-1001" },
+                { name: "Office of the Registrar", head: "Ms. Clarissa V. Reyes", email: "registrar@lshs.edu.ph", loc: "Admin Bldg, Ground Floor", phone: "(049) 501-1002" },
+                { name: "Guidance & Counseling Center", head: "Mr. Antonio L. Luna", email: "guidance@lshs.edu.ph", loc: "Student Center, Room 101", phone: "(049) 501-1003" },
+                { name: "School Clinic & Health Services", head: "Dr. Elena M. Mendoza", email: "clinic@lshs.edu.ph", loc: "Ground Floor, East Wing", phone: "(049) 501-1004" },
+                { name: "Finance & Cashier Office", head: "Mr. Fernando G. Torres", email: "finance@lshs.edu.ph", loc: "Admin Bldg, Window 3", phone: "(049) 501-1005" },
+                { name: "Learning Resource Center / Library", head: "Ms. Teresa P. Aquino", email: "library@lshs.edu.ph", loc: "Library Building", phone: "(049) 501-1006" }
+            ],
+            faculty: [
+                { name: "Engr. Mauricio Nicholas C. Durante", dept: "Science & Innovation", hours: "Mon/Wed 1:00 PM - 3:00 PM", email: "m.durante@lshs.edu.ph" },
+                { name: "Ms. Blessy Abiegem I. Advento", dept: "Mathematics", hours: "Tue/Thu 10:00 AM - 12:00 PM", email: "b.advento@lshs.edu.ph" },
+                { name: "Mr. Mark Adrian D. Amador", dept: "Social Sciences / SSLG Adviser", hours: "Daily 3:00 PM - 4:00 PM", email: "m.amador@lshs.edu.ph" },
+                { name: "Ms. Maria Andrea M. Chingtoco", dept: "Humanities & Languages", hours: "Wed/Fri 2:00 PM - 4:00 PM", email: "m.chingtoco@lshs.edu.ph" },
+                { name: "Ms. Cherry Anne C. Concio", dept: "Health & PE Department", hours: "Tue/Thu 1:00 PM - 3:00 PM", email: "c.concio@lshs.edu.ph" }
+            ]
+        };
+
+        // Global Application State
+        let appData = JSON.parse(localStorage.getItem('schooldule_data')) || DEFAULT_DATA;
+        let isAdminMode = false;
+        let selectedCategoryFilter = 'ALL';
+        let calendarCurrentMonth = new Date(2026, 9, 1); // October 2026
+        let selectedEventForDetail = null;
+
+        function saveDataToStorage() {
+            localStorage.setItem('schooldule_data', JSON.stringify(appData));
+            updateStatsAndPreviews();
+        }
+
+        // Fetch announcements and events from Supabase Cloud Database
+        async function loadAnnouncementsFromSupabase() {
+            if (!supabaseClient) {
+                updateStatsAndPreviews();
+                renderAnnouncements();
+                renderCalendar();
+                return;
+            }
+
+            try {
+                // Fetch Announcements
+                const { data: annData, error: annError } = await supabaseClient
+                    .from('announcements')
+                    .select('*')
+                    .order('id', { ascending: false });
+
+                if (!annError && annData && annData.length > 0) {
+                    appData.announcements = annData.map(item => ({
+                        id: item.id.toString(),
+                        title: item.title || '',
+                        category: item.category || 'Academic',
+                        target: item.strand || 'General',
+                        date: item.date || new Date().toISOString().split('T')[0],
+                        author: item.author || 'LSHS Administration',
+                        body: item.content || item.body || ''
+                    }));
+                }
+
+                // Fetch Events
+                const { data: evtData, error: evtError } = await supabaseClient
+                    .from('events')
+                    .select('*');
+
+                if (!evtError && evtData && evtData.length > 0) {
+                    appData.events = evtData.map(item => ({
+                        id: item.id.toString(),
+                        title: item.title || '',
+                        date: item.date || new Date().toISOString().split('T')[0],
+                        category: item.category || 'Academic',
+                        location: item.location || 'Campus Wide',
+                        desc: item.description || item.desc || ''
+                    }));
+                }
+
+                saveDataToStorage();
+            } catch (err) {
+                console.warn("Could not sync with Supabase database, displaying local cache:", err);
+            } finally {
+                updateStatsAndPreviews();
+                renderAnnouncements();
+                renderCalendar();
+            }
+        }
+
+        // Navigation Tab Switching
+        function switchTab(tabId) {
+            ['home', 'announcements', 'calendar', 'schedules', 'clubs', 'directory'].forEach(id => {
+                const panel = document.getElementById(`panel-${id}`);
+                if (panel) panel.classList.add('hidden');
+                
+                const navBtn = document.getElementById(`nav-${id}`);
+                if (navBtn) {
+                    navBtn.classList.remove('bg-white/10', 'text-lshs-brightGold');
+                    navBtn.classList.add('text-slate-200');
+                }
+            });
+
+            const targetPanel = document.getElementById(`panel-${tabId}`);
+            if (targetPanel) targetPanel.classList.remove('hidden');
+
+            const activeBtn = document.getElementById(`nav-${tabId}`);
+            if (activeBtn) {
+                activeBtn.classList.add('bg-white/10', 'text-lshs-brightGold');
+                activeBtn.classList.remove('text-slate-200');
+            }
+
+            document.getElementById('mobile-menu').classList.add('hidden');
+
+            if (tabId === 'announcements') renderAnnouncements();
+            if (tabId === 'calendar') renderCalendar();
+            if (tabId === 'schedules') renderSchedule();
+            if (tabId === 'clubs') renderClubs();
+            if (tabId === 'directory') renderDirectory();
+            if (tabId === 'home') updateStatsAndPreviews();
+
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+
+        function toggleMobileMenu() {
+            const menu = document.getElementById('mobile-menu');
+            menu.classList.toggle('hidden');
+        }
+
+        // Admin Passcode Handling
+        function handleAdminToggle() {
+            const toggle = document.getElementById('admin-toggle');
+            if (toggle.checked && !isAdminMode) {
+                document.getElementById('admin-pin-input').value = '';
+                document.getElementById('admin-pin-error').classList.add('hidden');
+                document.getElementById('modal-admin-pin').classList.remove('hidden');
+            } else if (!toggle.checked && isAdminMode) {
+                setAdminMode(false);
+            }
+        }
+
+        function verifyAdminPin(e) {
+            e.preventDefault();
+            const pin = document.getElementById('admin-pin-input').value;
+            if (pin === '1234') {
+                closeAdminPinModal();
+                setAdminMode(true);
+            } else {
+                document.getElementById('admin-pin-error').classList.remove('hidden');
+            }
+        }
+
+        function closeAdminPinModal() {
+            document.getElementById('modal-admin-pin').classList.add('hidden');
+            if (!isAdminMode) {
+                document.getElementById('admin-toggle').checked = false;
+            }
+        }
+
+        function setAdminMode(active) {
+            isAdminMode = active;
+            document.getElementById('admin-toggle').checked = active;
+            const statusText = document.getElementById('admin-status-text');
+            const alertBanner = document.getElementById('admin-alert-banner');
+
+            if (isAdminMode) {
+                statusText.innerText = 'Admin Mode';
+                statusText.classList.add('text-lshs-brightGold');
+                alertBanner.classList.remove('hidden');
+                document.querySelectorAll('.admin-only').forEach(el => el.classList.remove('hidden'));
+            } else {
+                statusText.innerText = 'Student Mode';
+                statusText.classList.remove('text-lshs-brightGold');
+                alertBanner.classList.add('hidden');
+                document.querySelectorAll('.admin-only').forEach(el => el.classList.add('hidden'));
+            }
+
+            renderAnnouncements();
+            renderCalendar();
+        }
+
+        function updateStatsAndPreviews() {
+            document.getElementById('stat-announcements-count').innerText = appData.announcements.length;
+            document.getElementById('stat-events-count').innerText = appData.events.length;
+            document.getElementById('stat-clubs-count').innerText = appData.clubs.length;
+
+            // Render Recent Announcements Preview
+            const recentContainer = document.getElementById('home-recent-announcements');
+            recentContainer.innerHTML = '';
+
+            const sortedAnn = [...appData.announcements].slice(0, 3);
+            sortedAnn.forEach(ann => {
+                const card = document.createElement('div');
+                card.className = 'bg-white p-4 rounded-xl shadow-sm border border-slate-200 hover:border-lshs-blue transition-all cursor-pointer';
+                card.onclick = () => { switchTab('announcements'); };
+                card.innerHTML = `
+                    <div class="flex items-center justify-between text-xs mb-1.5">
+                        <div class="flex items-center space-x-2">
+                            <span class="px-2 py-0.5 rounded font-bold ${getCategoryBadgeColor(ann.category)}">${ann.category}</span>
+                            <span class="text-slate-400 font-medium"><i class="fa-solid fa-users text-slate-400 mr-1"></i>${ann.target}</span>
+                        </div>
+                        <span class="text-slate-400 font-medium">${ann.date}</span>
+                    </div>
+                    <h3 class="font-bold text-slate-900 text-sm hover:text-lshs-blue transition-colors">${ann.title}</h3>
+                    <p class="text-xs text-slate-600 line-clamp-2 mt-1">${ann.body}</p>
+                `;
+                recentContainer.appendChild(card);
+            });
+
+            // Render Upcoming Events Preview
+            const upcomingContainer = document.getElementById('home-upcoming-events');
+            upcomingContainer.innerHTML = '';
+
+            const sortedEvt = [...appData.events].slice(0, 4);
+            sortedEvt.forEach(evt => {
+                const item = document.createElement('div');
+                item.className = 'py-3 flex items-start space-x-3 cursor-pointer hover:bg-slate-50 p-1.5 rounded-lg transition-colors';
+                item.onclick = () => { openEventDetailModal(evt); };
+                item.innerHTML = `
+                    <div class="bg-lshs-navy text-white rounded-lg p-2 text-center w-12 shrink-0">
+                        <span class="block text-[10px] font-bold uppercase tracking-wider text-lshs-brightGold">${new Date(evt.date).toLocaleString('default', { month: 'short' })}</span>
+                        <span class="block text-base font-extrabold leading-tight">${new Date(evt.date).getDate() || 1}</span>
+                    </div>
+                    <div class="flex-grow">
+                        <span class="text-[10px] font-bold uppercase px-1.5 py-0.5 rounded ${getEventBadgeColor(evt.category)}">${evt.category}</span>
+                        <h4 class="font-bold text-xs text-slate-900 mt-1">${evt.title}</h4>
+                        <p class="text-[11px] text-slate-500"><i class="fa-solid fa-location-dot mr-1"></i>${evt.location || 'LSHS Campus'}</p>
+                    </div>
+                `;
+                upcomingContainer.appendChild(item);
+            });
+        }
+
+        function getCategoryBadgeColor(cat) {
+            switch(cat) {
+                case 'Urgent': return 'bg-rose-100 text-rose-800';
+                case 'Academic': return 'bg-blue-100 text-blue-800';
+                case 'Administrative': return 'bg-slate-200 text-slate-800';
+                case 'Co-Curricular': return 'bg-emerald-100 text-emerald-800';
+                default: return 'bg-slate-100 text-slate-700';
+            }
+        }
+
+        function getEventBadgeColor(cat) {
+            switch(cat) {
+                case 'Academic': return 'bg-blue-100 text-blue-800';
+                case 'Deadline': return 'bg-rose-100 text-rose-800';
+                case 'Co-Curricular': return 'bg-emerald-100 text-emerald-800';
+                case 'Holiday': return 'bg-amber-100 text-amber-800';
+                default: return 'bg-slate-100 text-slate-700';
+            }
+        }
+
+        // Render Announcements List
+        function renderAnnouncements() {
+            const container = document.getElementById('announcements-container');
+            const searchVal = document.getElementById('announcement-search').value.toLowerCase();
+            const targetVal = document.getElementById('announcement-target-filter').value;
+
+            container.innerHTML = '';
+
+            const filtered = appData.announcements.filter(item => {
+                const matchesSearch = item.title.toLowerCase().includes(searchVal) || 
+                                      item.body.toLowerCase().includes(searchVal) || 
+                                      item.author.toLowerCase().includes(searchVal);
+                const matchesTarget = targetVal === 'ALL' || item.target === 'ALL' || item.target === targetVal;
+                const matchesCategory = selectedCategoryFilter === 'ALL' || item.category === selectedCategoryFilter;
+                return matchesSearch && matchesTarget && matchesCategory;
+            });
+
+            if (filtered.length === 0) {
+                container.innerHTML = `
+                    <div class="bg-white p-8 rounded-xl text-center text-slate-500 border border-slate-200">
+                        <i class="fa-solid fa-folder-open text-4xl mb-2 text-slate-300"></i>
+                        <p class="text-sm font-semibold">No announcements found matching your filter criteria.</p>
+                    </div>
+                `;
+                return;
+            }
+
+            filtered.forEach(ann => {
+                const card = document.createElement('div');
+                card.className = 'bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden hover:shadow-md transition-all';
+                card.innerHTML = `
+                    <div class="p-5 space-y-3">
+                        <div class="flex flex-wrap items-center justify-between gap-2 border-b border-slate-100 pb-2">
+                            <div class="flex items-center space-x-2">
+                                <span class="px-2.5 py-0.5 rounded-full text-xs font-bold ${getCategoryBadgeColor(ann.category)}">${ann.category}</span>
+                                <span class="bg-slate-100 text-slate-700 px-2 py-0.5 rounded text-xs font-semibold"><i class="fa-solid fa-users mr-1"></i>Target: ${ann.target}</span>
+                            </div>
+                            <span class="text-xs text-slate-400 font-medium"><i class="fa-regular fa-clock mr-1"></i>${ann.date}</span>
+                        </div>
+                        <h3 class="text-base font-bold text-slate-900 leading-snug">${ann.title}</h3>
+                        <p class="text-xs sm:text-sm text-slate-600 leading-relaxed">${ann.body}</p>
+                        <div class="flex items-center justify-between pt-2 border-t border-slate-100 text-xs text-slate-500">
+                            <span class="font-semibold text-lshs-navy"><i class="fa-solid fa-building-columns mr-1.5"></i>Publisher: ${ann.author}</span>
+                            <div class="admin-only ${isAdminMode ? '' : 'hidden'} space-x-2">
+                                <button onclick="editAnnouncement('${ann.id}')" class="text-blue-600 hover:underline font-bold"><i class="fa-solid fa-pen-to-square"></i> Edit</button>
+                                <button onclick="deleteAnnouncement('${ann.id}')" class="text-rose-600 hover:underline font-bold"><i class="fa-solid fa-trash"></i> Delete</button>
+                            </div>
+                        </div>
+                    </div>
+                `;
+                container.appendChild(card);
+            });
+        }
+
+        function setCategoryFilter(cat, btn) {
+            selectedCategoryFilter = cat;
+            document.querySelectorAll('.ann-cat-btn').forEach(b => {
+                b.className = 'ann-cat-btn bg-slate-100 text-slate-700 hover:bg-slate-200 text-xs px-3 py-1 rounded-full font-medium';
+            });
+            btn.className = 'ann-cat-btn bg-lshs-navy text-white text-xs px-3 py-1 rounded-full font-medium';
+            renderAnnouncements();
+        }
+
+        function filterAnnouncements() {
+            renderAnnouncements();
+        }
+
+        function openAnnouncementModal(editId = null) {
+            const modal = document.getElementById('modal-announcement');
+            const form = document.getElementById('announcement-form');
+            form.reset();
+
+            if (editId) {
+                const ann = appData.announcements.find(a => a.id === editId);
+                if (ann) {
+                    document.getElementById('ann-id').value = ann.id;
+                    document.getElementById('ann-title').value = ann.title;
+                    document.getElementById('ann-category').value = ann.category;
+                    document.getElementById('ann-target').value = ann.target;
+                    document.getElementById('ann-body').value = ann.body;
+                    document.getElementById('ann-author').value = ann.author;
+                    document.getElementById('announcement-modal-title').innerHTML = `<i class="fa-solid fa-pen-to-square text-lshs-brightGold mr-2"></i> Edit Announcement`;
+                }
+            } else {
+                document.getElementById('ann-id').value = '';
+                document.getElementById('announcement-modal-title').innerHTML = `<i class="fa-solid fa-bullhorn text-lshs-brightGold mr-2"></i> Post New Announcement`;
+            }
+            modal.classList.remove('hidden');
+        }
+
+        function closeAnnouncementModal() {
+            document.getElementById('modal-announcement').classList.add('hidden');
+        }
+
+        async function saveAnnouncement(e) {
+            e.preventDefault();
+            const id = document.getElementById('ann-id').value;
+            const title = document.getElementById('ann-title').value;
+            const category = document.getElementById('ann-category').value;
+            const target = document.getElementById('ann-target').value;
+            const body = document.getElementById('ann-body').value;
+            const author = document.getElementById('ann-author').value;
+            const date = new Date().toISOString().split('T')[0];
+
+            if (supabaseClient) {
+                try {
+                    if (id && !isNaN(parseInt(id))) {
+                        await supabaseClient.from('announcements').update({
+                            title, category, strand: target, content: body, author, date
+                        }).eq('id', parseInt(id));
+                    } else {
+                        await supabaseClient.from('announcements').insert([{
+                            title, category, strand: target, content: body, author, date
+                        }]);
+                    }
+                } catch (err) {
+                    console.warn("Supabase save error, storing locally:", err);
+                }
+            }
+
+            if (id) {
+                const index = appData.announcements.findIndex(a => a.id === id);
+                if (index !== -1) {
+                    appData.announcements[index] = { id, title, category, target, body, author, date };
+                }
+            } else {
+                const newAnn = { id: 'ann-' + Date.now(), title, category, target, body, author, date };
+                appData.announcements.unshift(newAnn);
+            }
+
+            saveDataToStorage();
+            closeAnnouncementModal();
+            loadAnnouncementsFromSupabase();
+        }
+
+        function editAnnouncement(id) {
+            openAnnouncementModal(id);
+        }
+
+        async function deleteAnnouncement(id) {
+            if (confirm('Are you sure you want to delete this announcement?')) {
+                if (supabaseClient && !isNaN(parseInt(id))) {
+                    try {
+                        await supabaseClient.from('announcements').delete().eq('id', parseInt(id));
+                    } catch (err) {
+                        console.warn("Supabase delete error:", err);
+                    }
+                }
+                appData.announcements = appData.announcements.filter(a => a.id !== id);
+                saveDataToStorage();
+                renderAnnouncements();
+            }
+        }
+
+        // Render Calendar Grid
+        function renderCalendar() {
+            const grid = document.getElementById('calendar-grid');
+            grid.innerHTML = '';
+
+            const year = calendarCurrentMonth.getFullYear();
+            const month = calendarCurrentMonth.getMonth();
+
+            document.getElementById('calendar-month-year').innerText = new Date(year, month).toLocaleString('default', { month: 'long', year: 'numeric' });
+
+            const firstDayIndex = new Date(year, month, 1).getDay();
+            const totalDays = new Date(year, month + 1, 0).getDate();
+
+            const selectedCategories = Array.from(document.querySelectorAll('.cal-filter-type:checked')).map(cb => cb.value);
+
+            // Previous month padding
+            for (let i = 0; i < firstDayIndex; i++) {
+                const emptyCell = document.createElement('div');
+                emptyCell.className = 'bg-slate-50/50 min-h-[90px] sm:min-h-[110px] p-1 border-b border-r border-slate-100 text-slate-300 text-xs font-semibold';
+                grid.appendChild(emptyCell);
+            }
+
+            // Days of the current month
+            for (let day = 1; day <= totalDays; day++) {
+                const dayCell = document.createElement('div');
+                const formattedDate = `${year}-${String(month + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
+                const isToday = formattedDate === new Date().toISOString().split('T')[0];
+
+                dayCell.className = `min-h-[90px] sm:min-h-[110px] p-1.5 border-b border-r border-slate-200 transition-colors ${isToday ? 'bg-amber-50/60 font-bold' : 'bg-white hover:bg-slate-50'}`;
+
+                let dayHeader = `
+                    <div class="flex items-center justify-between mb-1">
+                        <span class="text-xs ${isToday ? 'bg-lshs-navy text-white px-1.5 py-0.5 rounded-full' : 'text-slate-700 font-bold'}">${day}</span>
+                        ${isAdminMode ? `<button onclick="openEventModal('${formattedDate}')" title="Add event" class="text-[10px] text-lshs-blue hover:text-slate-900 font-bold"><i class="fa-solid fa-plus"></i></button>` : ''}
+                    </div>
+                `;
+
+                const dayEvents = appData.events.filter(e => e.date === formattedDate && selectedCategories.includes(e.category));
+
+                let eventsHTML = '<div class="space-y-1 overflow-y-auto max-h-[75px]">';
+                dayEvents.forEach(evt => {
+                    eventsHTML += `
+                        <div onclick="openEventDetailModalById('${evt.id}')" class="text-[10px] p-1 rounded font-semibold truncate cursor-pointer ${getEventBadgeColor(evt.category)} hover:opacity-90 transition-opacity">
+                            <i class="fa-solid fa-circle text-[6px] mr-1"></i>${evt.title}
+                        </div>
+                    `;
+                });
+                eventsHTML += '</div>';
+
+                dayCell.innerHTML = dayHeader + eventsHTML;
+                grid.appendChild(dayCell);
+            }
+        }
+
+        function changeCalendarMonth(delta) {
+            calendarCurrentMonth.setMonth(calendarCurrentMonth.getMonth() + delta);
+            renderCalendar();
+        }
+
+        function filterCalendarEvents() {
+            renderCalendar();
+        }
+
+        function openEventModal(dateStr = '') {
+            const modal = document.getElementById('modal-event');
+            document.getElementById('event-form').reset();
+            if (dateStr) {
+                document.getElementById('evt-date').value = dateStr;
+            }
+            modal.classList.remove('hidden');
+        }
+
+        function closeEventModal() {
+            document.getElementById('modal-event').classList.add('hidden');
+        }
+
+        async function saveEvent(e) {
+            e.preventDefault();
+            const title = document.getElementById('evt-title').value;
+            const date = document.getElementById('evt-date').value;
+            const category = document.getElementById('evt-category').value;
+            const location = document.getElementById('evt-location').value;
+            const desc = document.getElementById('evt-desc').value;
+
+            if (supabaseClient) {
+                try {
+                    await supabaseClient.from('events').insert([{
+                        title, date, category, location, description: desc
+                    }]);
+                } catch (err) {
+                    console.warn("Supabase event save error:", err);
+                }
+            }
+
+            const newEvt = { id: 'evt-' + Date.now(), title, date, category, location, desc };
+            appData.events.push(newEvt);
+            saveDataToStorage();
+            closeEventModal();
+            loadAnnouncementsFromSupabase();
+        }
+
+        function openEventDetailModalById(id) {
+            const evt = appData.events.find(e => e.id === id);
+            if (evt) openEventDetailModal(evt);
+        }
+
+        function openEventDetailModal(evt) {
+            selectedEventForDetail = evt;
+            const badge = document.getElementById('evt-detail-badge');
+            badge.innerText = evt.category;
+            badge.className = `text-xs font-bold px-2.5 py-1 rounded-full uppercase ${getEventBadgeColor(evt.category)}`;
+
+            document.getElementById('evt-detail-title').innerText = evt.title;
+            document.getElementById('evt-detail-date').innerText = evt.date;
+            document.getElementById('evt-detail-location').innerText = evt.location || 'Campus Wide';
+            document.getElementById('evt-detail-desc').innerText = evt.desc || 'No additional details provided.';
+
+            const adminActions = document.getElementById('evt-detail-admin-actions');
+            if (isAdminMode) {
+                adminActions.classList.remove('hidden');
+            } else {
+                adminActions.classList.add('hidden');
+            }
+
+            document.getElementById('modal-event-detail').classList.remove('hidden');
+        }
+
+        function closeEventDetailModal() {
+            document.getElementById('modal-event-detail').classList.add('hidden');
+            selectedEventForDetail = null;
+        }
+
+        async function deleteCurrentEvent() {
+            if (selectedEventForDetail && confirm('Are you sure you want to delete this event?')) {
+                if (supabaseClient && !isNaN(parseInt(selectedEventForDetail.id))) {
+                    try {
+                        await supabaseClient.from('events').delete().eq('id', parseInt(selectedEventForDetail.id));
+                    } catch (err) {
+                        console.warn("Supabase delete event error:", err);
+                    }
+                }
+                appData.events = appData.events.filter(e => e.id !== selectedEventForDetail.id);
+                saveDataToStorage();
+                closeEventDetailModal();
+                renderCalendar();
+            }
+        }
+
+        // Class Schedule System Renderer
+        function updateSectionDropdown() {
+            const grade = document.getElementById('schedule-grade').value;
+            const strand = document.getElementById('schedule-strand').value;
+            const sectionSelect = document.getElementById('schedule-section');
+
+            sectionSelect.innerHTML = '';
+
+            if (appData.schedules[grade] && appData.schedules[grade][strand]) {
+                const sections = Object.keys(appData.schedules[grade][strand]);
+                sections.forEach(sec => {
+                    const opt = document.createElement('option');
+                    opt.value = sec;
+                    opt.innerText = sec;
+                    sectionSelect.appendChild(opt);
+                });
+            } else {
+                const opt = document.createElement('option');
+                opt.value = '';
+                opt.innerText = 'No sections available';
+                sectionSelect.appendChild(opt);
+            }
+        }
+
+        function renderSchedule() {
+            const grade = document.getElementById('schedule-grade').value;
+            const strand = document.getElementById('schedule-strand').value;
+            const section = document.getElementById('schedule-section').value;
+
+            const headingSec = document.getElementById('schedule-heading-section');
+            const headingAdv = document.getElementById('schedule-heading-adviser');
+            const tableBody = document.getElementById('schedule-table-body');
+
+            tableBody.innerHTML = '';
+
+            if (appData.schedules[grade] && appData.schedules[grade][strand] && appData.schedules[grade][strand][section]) {
+                const data = appData.schedules[grade][strand][section];
+                headingSec.innerText = `${section} Timetable (${grade} ${strand})`;
+                headingAdv.innerText = `Adviser: ${data.adviser} | ${data.room}`;
+
+                data.timetable.forEach(row => {
+                    const tr = document.createElement('tr');
+                    tr.className = 'hover:bg-slate-50 transition-colors border-b border-slate-100';
+                    tr.innerHTML = `
+                        <td class="p-3 border-r border-slate-200 font-bold text-slate-800 text-center bg-slate-50">${row.time}</td>
+                        <td class="p-3 border-r border-slate-200 text-center">${formatSubjectCell(row.mon)}</td>
+                        <td class="p-3 border-r border-slate-200 text-center">${formatSubjectCell(row.tue)}</td>
+                        <td class="p-3 border-r border-slate-200 text-center">${formatSubjectCell(row.wed)}</td>
+                        <td class="p-3 border-r border-slate-200 text-center">${formatSubjectCell(row.thu)}</td>
+                        <td class="p-3 text-center">${formatSubjectCell(row.fri)}</td>
+                    `;
+                    tableBody.appendChild(tr);
+                });
+            } else {
+                headingSec.innerText = `Schedule Not Available`;
+                headingAdv.innerText = `Please select another section or contact the Registrar`;
+                tableBody.innerHTML = `
+                    <tr>
+                        <td colspan="6" class="p-8 text-center text-slate-400 font-semibold">
+                            No active schedule data populated for this section.
+                        </td>
+                    </tr>
+                `;
+            }
+        }
+
+        function formatSubjectCell(subj) {
+            if (!subj) return '<span class="text-slate-300">-</span>';
+            if (subj.includes('RECESS') || subj.includes('LUNCH')) {
+                return `<span class="bg-amber-100 text-amber-800 font-extrabold px-2 py-0.5 rounded text-[11px]">${subj}</span>`;
+            }
+            return `<span class="font-semibold text-slate-800">${subj}</span>`;
+        }
+
+        // Clubs & Directory Renderer
+        function renderClubs() {
+            const container = document.getElementById('clubs-container');
+            const searchVal = document.getElementById('club-search').value.toLowerCase();
+            container.innerHTML = '';
+
+            const filtered = appData.clubs.filter(c => 
+                c.name.toLowerCase().includes(searchVal) || 
+                c.adviser.toLowerCase().includes(searchVal) || 
+                c.category.toLowerCase().includes(searchVal)
+            );
+
+            filtered.forEach(club => {
+                const card = document.createElement('div');
+                card.className = 'bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden hover:shadow-md transition-all flex flex-col justify-between';
+                card.innerHTML = `
+                    <div class="p-5 space-y-3">
+                        <div class="flex items-center space-x-3">
+                            <div class="${club.color} text-white w-10 h-10 rounded-lg flex items-center justify-center text-lg shrink-0 shadow">
+                                <i class="fa-solid ${club.icon}"></i>
+                            </div>
+                            <div>
+                                <span class="text-[10px] font-extrabold uppercase tracking-wider text-lshs-gold">${club.category}</span>
+                                <h3 class="font-bold text-slate-900 text-sm leading-tight">${club.name}</h3>
+                            </div>
+                        </div>
+                        <p class="text-xs text-slate-600 leading-relaxed">${club.desc}</p>
+                        <div class="space-y-1.5 text-xs text-slate-700 bg-slate-50 p-3 rounded-lg border border-slate-100">
+                            <p><span class="font-bold text-slate-900">Faculty Adviser:</span> ${club.adviser}</p>
+                            <p><span class="font-bold text-slate-900">Student Officer / President:</span> ${club.president}</p>
+                            <p class="flex items-center text-slate-500 font-medium pt-1">
+                                <i class="fa-solid fa-clock text-lshs-gold mr-1.5"></i> ${club.schedule}
+                            </p>
+                        </div>
+                    </div>
+                    <div class="bg-slate-100 px-5 py-3 border-t border-slate-200 flex items-center justify-between text-xs">
+                        <span class="text-slate-500 font-semibold">Official LSHS Club</span>
+                        <button onclick="alert('Inquiry sent to ${club.name} Officers!')" class="text-lshs-blue font-bold hover:underline">
+                            Join / Contact <i class="fa-solid fa-paper-plane ml-1"></i>
+                        </button>
+                    </div>
+                `;
+                container.appendChild(card);
+            });
+        }
+
+        function renderDirectory() {
+            const officeContainer = document.getElementById('office-directory-container');
+            officeContainer.innerHTML = '';
+
+            appData.offices.forEach(off => {
+                const card = document.createElement('div');
+                card.className = 'bg-white p-4 rounded-xl shadow-sm border border-slate-200 space-y-2 hover:border-lshs-blue transition-all';
+                card.innerHTML = `
+                    <h4 class="font-extrabold text-sm text-slate-900 flex items-center">
+                        <i class="fa-solid fa-building text-lshs-gold mr-2"></i>${off.name}
+                    </h4>
+                    <p class="text-xs text-slate-600"><span class="font-bold text-slate-800">Head:</span> ${off.head}</p>
+                    <div class="text-xs text-slate-500 space-y-1 pt-1 border-t border-slate-100">
+                        <p><i class="fa-solid fa-location-dot w-4 text-slate-400"></i> ${off.loc}</p>
+                        <p><i class="fa-solid fa-envelope w-4 text-slate-400"></i> ${off.email}</p>
+                        <p><i class="fa-solid fa-phone w-4 text-slate-400"></i> ${off.phone}</p>
+                    </div>
+                `;
+                officeContainer.appendChild(card);
+            });
+
+            const facultyBody = document.getElementById('faculty-directory-body');
+            facultyBody.innerHTML = '';
+
+            appData.faculty.forEach(fac => {
+                const tr = document.createElement('tr');
+                tr.className = 'hover:bg-slate-50 transition-colors';
+                tr.innerHTML = `
+                    <td class="p-2.5 font-bold text-slate-900">${fac.name}</td>
+                    <td class="p-2.5 text-slate-600">${fac.dept}</td>
+                    <td class="p-2.5 font-medium text-amber-700 bg-amber-50/50 rounded">${fac.hours}</td>
+                    <td class="p-2.5 text-lshs-blue hover:underline cursor-pointer" onclick="alert('Opening email client for ${fac.email}')">${fac.email}</td>
+                `;
+                facultyBody.appendChild(tr);
+            });
+        }
+
+        // Research Modal Toggle
+        function openResearchModal() {
+            document.getElementById('modal-research').classList.remove('hidden');
+        }
+
+        function closeResearchModal() {
+            document.getElementById('modal-research').classList.add('hidden');
+        }
+
+        // Window Startup Initialization
+        window.onload = function() {
+            updateSectionDropdown();
+            updateStatsAndPreviews();
+            renderSchedule();
+            renderClubs();
+            renderDirectory();
+            loadAnnouncementsFromSupabase();
+        };
+    </script>
+</body>
+</html>
